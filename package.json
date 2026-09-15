@@ -69,6 +69,8 @@
   ],
   "scripts": {
     "test": "vitest run --config tests/unit/vitest.config.mjs",
+    "action:build": "node scripts/build-action.mjs",
+    "action:check": "node scripts/build-action.mjs --check",
     "docs:schemas": "node scripts/sync-docs-schemas.mjs",
     "python:bump": "node scripts/bump-python-version.mjs",
     "types": "node scripts/generate-contract-types.mjs && node scripts/generate-runtime-types.mjs",
@@ -81,9 +83,11 @@
     "yazl": "3.3.1"
   },
   "devDependencies": {
+    "@actions/core": "3.0.1",
     "@types/node": "^24.13.3",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
+    "esbuild": "0.28.2",
     "json-schema-to-typescript": "^15.0.4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.9"

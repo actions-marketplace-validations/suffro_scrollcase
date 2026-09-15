@@ -1,0 +1,69 @@
+name: Scrollcase Build
+author: Lorenzo S.
+description: Build and verify one signed Scrollcase box on the matching GitHub Actions runner.
+branding:
+  icon: package
+  color: blue
+inputs:
+  scroll:
+    description: Box id under the project's configured scrolls directory.
+    required: true
+  target:
+    description: Exact Scrollcase target id, for example linux-x86_64-cpu.
+    required: true
+  working-directory:
+    description: Project directory relative to GITHUB_WORKSPACE.
+    required: false
+    default: '.'
+  install-toolchain:
+    description: Install the scroll's pinned pixi and Scrollcase's pinned conda-pack when missing.
+    required: false
+    default: 'true'
+  self-test:
+    description: Verify the completed box by extracting it and running its declared self-test.
+    required: false
+    default: 'true'
+  channel:
+    description: Channel document to build: nightly, beta or stable.
+    required: false
+    default: beta
+  namespace:
+    description: Optional signed-document namespace; defaults to scrollcase.box.
+    required: false
+    default: ''
+  publish-base-url:
+    description: Optional base URL written into the signed release and channel documents.
+    required: false
+    default: ''
+  private-key:
+    description: Local signing private-key path, relative to the project unless absolute.
+    required: false
+    default: ''
+  public-key:
+    description: Trusted public-key path, relative to the project unless absolute.
+    required: false
+    default: ''
+  signer-command:
+    description: External signer command; mutually exclusive with private-key and requires public-key.
+    required: false
+    default: ''
+outputs:
+  archive:
+    description: Absolute path of the verified box archive.
+  release:
+    description: Absolute path of the verified signed release document.
+  channel-document:
+    description: Absolute path of the signed channel document.
+  archive-sha256:
+    description: SHA-256 digest of the box archive.
+  box-id:
+    description: Box id read from the validated scroll.
+  box-version:
+    description: Box version read from the validated scroll.
+  runtime:
+    description: Runtime id read from the validated scroll: python, node or native.
+  target:
+    description: Canonical target id read from the validated scroll.
+runs:
+  using: node24
+  main: action/dist/index.cjs

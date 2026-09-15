@@ -190,6 +190,22 @@ release and channel documents, and a publication-ready directory tree.
 If a declared import fails, an asset hash does not match, or a parity check breaches its tolerance,
 there is no box. A failed gate never produces a signed artefact.
 
+In CI, the official Action performs the same build and verification for one target on its matching
+runner, then exposes the local archive and release paths to later workflow steps:
+
+```yaml
+- uses: suffro/scrollcase@action-v1
+  id: box
+  with:
+    scroll: my-model
+    target: linux-x86_64-cpu
+    private-key: ${{ runner.temp }}/signing-private.pem
+    public-key: trust/signing-public.json
+```
+
+The runtime comes from the scroll. Runner matrices, key materialisation, upload and publication stay
+in the caller's workflow. → [GitHub Actions guide](https://scrollcase.dev/guides/github-actions)
+
 <br>
 
 ## Running a box

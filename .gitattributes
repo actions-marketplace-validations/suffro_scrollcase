@@ -17,3 +17,7 @@ examples/**/readings.txt -text
 # Committed locks and licence inventories are compared byte for byte across platforms in CI.
 examples/**/pixi.lock -text
 examples/**/conda-licenses.json -text
+
+# The JavaScript Action bundle is committed and checked for byte drift on every platform.
+action.yml text eol=lf
+action/** text eol=lf

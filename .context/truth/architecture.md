@@ -29,6 +29,7 @@ the shape of the system; those two are not repeated here.
 | `src/sign/` | Key generation, local signing, external-signer dispatch, verification. |
 | `src/consumer/` | The Node consumer: verify, extract, attach, run. |
 | `src/cli.mjs` | Argument parsing and dispatch, and nothing else. |
+| `action/` | The Node 24 GitHub Action: validated CI inputs around the existing build and verification implementations, with a committed dependency-complete bundle. |
 | `python/` | The `scrollcase-consumer` PyPI package — the same consumer again, with bundled schema copies. |
 | `rust/` | The `scrollcase-consumer` crate — the same consumer a third time, with the contract mirror under `src/contract/` and fixtures and schemas copied in by `scripts/sync-assets.mjs`. |
 | `docs/` | The VitePress site, part of the deliverable, deployed to Cloudflare Pages. |
@@ -56,7 +57,7 @@ precedes execution, always, in all three consumers.
 - **Asset hosts** named by the scroll, for deferred assets. Size- and hash-checked before use.
 - **An external signer**, optional, dispatched by `src/sign/`. It must echo back the exact payload
   it was given.
-- **GitHub Actions** for CI, the demo box builds and the tag-driven releases; **Cloudflare Pages**
+- **GitHub Actions** for CI, the official one-target build Action, the demo box builds and the tag-driven releases; **Cloudflare Pages**
   for `scrollcase.dev`, including one Pages Function for Markdown content negotiation.
 
 ## Important constraints

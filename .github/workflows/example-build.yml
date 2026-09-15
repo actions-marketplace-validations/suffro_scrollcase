@@ -101,28 +101,45 @@ jobs:
       - name: Create an ephemeral signing key
         run: node src/cli.mjs keygen
 
-      - name: Build
-        run: node src/cli.mjs build hello-box/${{ matrix.target }} --scrolls-dir examples
-
-      # The check that matters: extract the box and import with the interpreter inside it.
-      - name: Verify with self-test
+      # The Action needs an ordinary consumer workspace. Keep that workspace in a nested, clean
+      # checkout so provenance remains honest without adding example-only configuration at the
+      # repository root. Its generated state is ignored by both repositories and disappears with
+      # the runner.
+      - name: Stage the Action validation workspace
         shell: bash
         run: |
-          release=$(ls .scrollcase/dist/boxes/hello-box/1.0.0/${{ matrix.target }}/*.release.json)
-          node src/cli.mjs verify "$release" --self-test
+          set -euo pipefail
+          printf '%s\n' '.action-validation/' >> .git/info/exclude
+          mkdir .action-validation
+          cp -R examples .action-validation/examples
+          printf '%s\n' '{"version":1,"paths":{"scrolls":"examples","build":".scrollcase/build","dist":".scrollcase/dist","keys":"../.scrollcase/keys","toolchain":"../.scrollcase/toolchain"}}' > .action-validation/scrollcase.config.json
+          printf '%s\n' '.scrollcase/' > .action-validation/.gitignore
+          git -C .action-validation init
+          git -C .action-validation config user.name scrollcase-ci
+          git -C .action-validation config user.email scrollcase-ci@users.noreply.github.com
+          git -C .action-validation add .
+          git -C .action-validation commit -m 'Stage Action validation fixtures'
+
+      # This is the Marketplace path under test: the checked-out Action builds, signs, verifies,
+      # extracts and runs the declared self-test rather than invoking an installed CLI wrapper.
+      - name: Build and verify the Python demo with the Action
+        id: action-hello
+        uses: ./
+        with:
+          working-directory: .action-validation
+          scroll: hello-box
+          target: ${{ matrix.target }}
+          install-toolchain: 'false'
 
       - name: Run the box entry point
         shell: bash
-        run: |
-          release=$(ls .scrollcase/dist/boxes/hello-box/1.0.0/${{ matrix.target }}/*.release.json)
-          node src/cli.mjs run "$release"
+        run: node src/cli.mjs run "${{ steps.action-hello.outputs.release }}"
 
       # What a box costs its user is worth seeing on every run, not reconstructed from a download
       # when someone happens to wonder. The two numbers differ per platform for real reasons.
       - name: Report the box size
         shell: bash
         run: |
-          release=$(ls .scrollcase/dist/boxes/hello-box/1.0.0/${{ matrix.target }}/*.release.json)
           node -e '
             const fs = require("fs");
             const signed = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
@@ -130,7 +147,7 @@ jobs:
             const mb = (bytes) => (bytes / 1024 / 1024).toFixed(1) + " MB";
             console.log(`archive   ${mb(payload.archive.sizeBytes)}`);
             console.log(`extracted ${mb(payload.installedSizeBytes)}`);
-          ' "$release"
+          ' "${{ steps.action-hello.outputs.release }}"
 
       # The two smoke tests for the other runtimes, on the one target their scrolls declare. They
       # are the only thing in CI that builds a box with no interpreter, and a box whose interpreter
@@ -153,26 +170,43 @@ jobs:
           node src/cli.mjs verify "$(release_for hello-box-native)" --self-test
           node src/cli.mjs run "$(release_for hello-box-native)" -- --version
 
-      # The three published demo boxes for the node and native runtimes, on every target their
-      # scrolls declare — which is now all three. These are the boxes `codon-demo-v1`,
-      # `transcode-demo-v1` and `dataset-demo-v1` ship to the public, so a target that only ever
-      # built inside the publishing workflow would have its first build be the one that goes out
-      # signed. No `if` at all: the step covers the whole matrix, so adding a target to the matrix
-      # adds it here too rather than quietly skipping it.
-      - name: Build, verify and run the demo boxes
+      # Exercise the other two runtimes through the Action on every compatible host. These builds
+      # are runner-local validation only: no tag, release or publishing workflow is involved.
+      - name: Build and verify the Node demo with the Action
+        id: action-codon
+        uses: ./
+        with:
+          working-directory: .action-validation
+          scroll: codon-demo
+          target: ${{ matrix.target }}
+          install-toolchain: 'false'
+
+      - name: Run the Node demo
+        shell: bash
+        run: node src/cli.mjs run "${{ steps.action-codon.outputs.release }}" -- Leucine
+
+      - name: Build and verify the native demo with the Action
+        id: action-dataset
+        uses: ./
+        with:
+          working-directory: .action-validation
+          scroll: dataset-demo
+          target: ${{ matrix.target }}
+          install-toolchain: 'false'
+
+      - name: Run the native demo
+        shell: bash
+        run: node src/cli.mjs run "${{ steps.action-dataset.outputs.release }}" -- -H readings.h5
+
+      # Keep the larger native transcode demo as direct end-to-end CLI coverage; the smaller
+      # dataset demo above already exercises the same runtime through the Action.
+      - name: Build, verify and run the transcode demo
         shell: bash
         run: |
           set -euo pipefail
           release_for() {
             ls .scrollcase/dist/boxes/"$1"/1.0.0/${{ matrix.target }}/*.release.json
           }
-
-          # A node box doing real work rather than proving it starts: reference data pinned by hash,
-          # queried through `node:sqlite`. It is the one example whose payload carries data the box
-          # is expected to answer questions about, so a wrong answer here is a build failure.
-          node src/cli.mjs build codon-demo/${{ matrix.target }} --scrolls-dir examples
-          node src/cli.mjs verify "$(release_for codon-demo)" --self-test
-          node src/cli.mjs run "$(release_for codon-demo)" -- Leucine
 
           # The native counterpart: a large compiled program with a long tail of codec libraries,
           # whose self-test runs a real encode rather than a version check. Slower than the rest of
@@ -182,13 +216,6 @@ jobs:
           node src/cli.mjs verify "$(release_for transcode-demo)" --self-test
           node src/cli.mjs run "$(release_for transcode-demo)" -- -version
 
-          # The other native shape: small compiled tools reading a data file the box ships, rather
-          # than one large program driven by flags. Its self-test reads the shipped dataset both
-          # ways — structure and values — so a box whose data or reader stopped agreeing fails here.
-          node src/cli.mjs build dataset-demo/${{ matrix.target }} --scrolls-dir examples
-          node src/cli.mjs verify "$(release_for dataset-demo)" --self-test
-          node src/cli.mjs run "$(release_for dataset-demo)" -- -H readings.h5
-
       # Determinism is a promise the repository makes that nothing else verifies end to end.
       #
       # The assertion is the archive's *name*, not the file count. The archive is named by its own
@@ -196,18 +223,20 @@ jobs:
       # replaces the first archive rather than landing beside it — counting the files afterwards
       # always yields one and could never fail. Measured: changing the scroll's sourceRevision
       # produced a completely different archive and left the count at one.
-      - name: Rebuild and compare
+      - name: Rebuild the Python demo with the Action
+        id: action-hello-rebuild
+        uses: ./
+        with:
+          working-directory: .action-validation
+          scroll: hello-box
+          target: ${{ matrix.target }}
+          install-toolchain: 'false'
+
+      - name: Compare rebuild
         shell: bash
         run: |
-          set -euo pipefail
-          dist=".scrollcase/dist/boxes/hello-box/1.0.0/${{ matrix.target }}"
-          before=$(basename "$(ls "$dist"/*.zip)")
-          node src/cli.mjs build hello-box/${{ matrix.target }} --scrolls-dir examples
-          after=$(basename "$(ls "$dist"/*.zip)")
-          if [ "$before" != "$after" ]; then
-            echo "Rebuild was not byte-identical:" >&2
-            echo "  first  $before" >&2
-            echo "  second $after" >&2
+          if [ "${{ steps.action-hello.outputs.archive-sha256 }}" != "${{ steps.action-hello-rebuild.outputs.archive-sha256 }}" ]; then
+            echo "Rebuild was not byte-identical" >&2
             exit 1
           fi
-          echo "Rebuild produced a byte-identical archive: $after"
+          echo "Rebuild produced a byte-identical archive: ${{ steps.action-hello-rebuild.outputs.archive-sha256 }}"

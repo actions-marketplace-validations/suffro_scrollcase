@@ -1,6 +1,6 @@
 # Current State
 
-Last reviewed: 2026-09-11.
+Last reviewed: 2026-09-15.
 
 ## In flight
 
@@ -43,6 +43,10 @@ still refused everywhere.
 
 ## Recent relevant changes
 
+- **The official GitHub Action is implemented, unreleased.** It builds and verifies one explicitly
+  selected target on the matching runner, supports every runtime through the scroll, installs only
+  a toolchain whose host digest the project already committed, and leaves upload and publication to
+  the caller. Its Node 24 bundle and schemas are committed and checked for drift.
 - **`scrollcase@1.0.0`** released 2026-09-02 (tag `v1.0.0`), carrying the version 3 box format:
   a declared `runtime` block, `labels` replacing `modelId`/`runtimeId`, per-asset `embed` replacing
   the box-wide `weights` switch, a generalised `selfTest.probe`, declared executables,

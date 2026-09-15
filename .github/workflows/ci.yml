@@ -26,6 +26,36 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - run: npm run action:check
+
+  action-smoke:
+    name: action bundle (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x86_64-cpu
+          - os: macos-latest
+            target: macos-aarch64-cpu
+          - os: windows-latest
+            target: windows-x86_64-cpu
+    steps:
+      - uses: actions/checkout@v4
+      # The missing box is deliberate: reaching that validation proves the dependency-complete
+      # Node 24 bundle loaded and crossed its checkout boundary without installing anything.
+      - uses: ./
+        id: missing-box
+        continue-on-error: true
+        with:
+          scroll: action-smoke-missing
+          target: ${{ matrix.target }}
+      - name: Require the expected validation failure
+        if: steps.missing-box.outcome != 'failure'
+        shell: bash
+        run: exit 1
 
   package:
     name: package surface

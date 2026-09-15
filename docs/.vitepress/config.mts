@@ -139,6 +139,7 @@ const sidebar = [
       { text: 'Signing & Key Custody', link: '/guides/signing-and-custody' },
       { text: 'Offline / Air-Gapped Installs', link: '/guides/offline-airgap' },
       { text: 'Distributing Boxes', link: '/guides/distributing-boxes' },
+      { text: 'GitHub Actions', link: '/guides/github-actions' },
       { text: 'Platform Examples', link: '/guides/platform-examples' },
       { text: 'Migrating from v2', link: '/guides/migrating-from-v2' },
       { text: 'Troubleshooting', link: '/guides/troubleshooting' }

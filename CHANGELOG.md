@@ -6,6 +6,18 @@ All notable changes to Scrollcase are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **An official GitHub Action builds and verifies one box target.** It reads the runtime from the
+  scroll, supports `python`, `node` and `native`, validates its complete input surface before work,
+  refuses a runner that does not match the target, and returns the archive, release, channel and
+  identity outputs without uploading or publishing anything. `working-directory` defaults to the
+  checkout root for ordinary repositories and may select a nested project in a monorepo.
+- **CI toolchain installation uses the project's reviewed pixi digest.** The Action never turns an
+  ephemeral runner into a fresh trust decision: when pixi is missing, the host asset must already
+  be pinned in committed `scrollcase.config.json`. The committed Node 24 bundle includes its
+  dependencies and schemas; `action:check` rejects generated drift.
+
 ## [1.2.0] — 2026-09-12
 
 ### Added

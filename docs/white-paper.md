@@ -5806,6 +5806,28 @@ reason given in section 3.
   A missing answer in a non-interactive environment is an error with the flag that would supply it,
   never a prompt that hangs a pipeline forever.
 
+<div class="h3-section-initial-part">
+
+### 9.7 The GitHub Action
+
+The Action is another edge over the existing builder, not another build implementation. It selects
+one explicit box and target, verifies that the runner is native for it, prepares only a reviewed
+toolchain, calls `buildBox`, and then calls `verifyBox` on the returned release. The runtime comes
+from the scroll, so `python`, `node` and `native` take the same Action path.
+
+</div>
+
+`action/src/options.mjs` converts GitHub's string inputs into a validated contract before any file
+or network access. `action/src/run.mjs` keeps `working-directory` inside the checkout even through
+symbolic links and owns the CI orchestration. `action/src/toolchain.mjs` requires the pixi asset
+digest already committed by the project-local installer, so an ephemeral runner does not trust a
+fresh checksum on every run. The generated Node 24 bundle contains its dependencies; canonical
+schemas are copied beside it because the underlying modules deliberately load those files at
+runtime.
+
+The boundary remains unchanged: one invocation prepares local files. The caller chooses the runner
+and matrix, materialises signing credentials, uploads artefacts and publishes them.
+
 ## 10. The invariants
 
 <div class="h3-section-initial-part">
@@ -6492,6 +6514,19 @@ what a box's runtime is allowed to need that another runtime would not.
 | `src/cli-run.mjs` | Translating a child's terminal result into this process's own | 8.8 |
 | `src/cli-docs.mjs` | The one place the documentation site's URL is written, and the section each interactive question points at | 9.4 |
 | `src/cli-output.mjs` | Status symbols, the shared question layout, optional colour, and the distribution summary | 9.5 |
+
+</div>
+
+<div class="h4-section">
+
+#### `action/` — the GitHub Actions edge
+
+| Module | Role | Section |
+| --- | --- | --- |
+| `action/src/options.mjs` | Parse and cross-validate the public Action inputs before work | 9.7 |
+| `action/src/toolchain.mjs` | Install only the project-reviewed toolchain without rewriting its configuration | 9.7 |
+| `action/src/run.mjs` | One target's build-and-verify orchestration and checkout path boundary | 9.7 |
+| `action/src/main.mjs` | GitHub inputs, outputs, failure state and job summary | 9.7 |
 
 </div>
 
