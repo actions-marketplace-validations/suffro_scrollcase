@@ -49,6 +49,17 @@ async function thirdPartyNotices(metafile) {
   return sections.join('\n');
 }
 
+async function copySchemas(source, destination) {
+  for (const file of await filesBelow(source)) {
+    const target = join(destination, file);
+    await mkdir(dirname(target), { recursive: true });
+    const contents = await readFile(join(source, file), 'utf8');
+    // Git may check the canonical sources out as CRLF on Windows. Generated Action artefacts are
+    // committed as LF, so normalise at the generation boundary rather than comparing host bytes.
+    await writeFile(target, contents.replaceAll('\r\n', '\n'));
+  }
+}
+
 async function generate(destination) {
   const output = join(destination, 'dist', 'index.cjs');
   await mkdir(dirname(output), { recursive: true });
@@ -68,7 +79,7 @@ async function generate(destination) {
     ].join('\n') },
   });
   await writeFile(join(destination, 'dist', 'THIRD_PARTY_NOTICES.txt'), await thirdPartyNotices(result.metafile));
-  await cp(join(root, 'src', 'contract', 'schema'), join(destination, 'contract', 'schema'), { recursive: true });
+  await copySchemas(join(root, 'src', 'contract', 'schema'), join(destination, 'contract', 'schema'));
 }
 
 async function compare(expectedRoot) {

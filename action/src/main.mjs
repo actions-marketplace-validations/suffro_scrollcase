@@ -5,6 +5,9 @@ import { actionSummary, executeAction } from './run.mjs';
 async function main() {
   try {
     const options = readActionOptions(core.getInput);
+    // Written before any filesystem or toolchain work so CI can distinguish a loaded bundle from
+    // an action.yml parse failure while still testing the ordinary failure path.
+    core.setOutput('target', options.target);
     const result = await executeAction(options, { log: core.info });
     for (const [name, value] of Object.entries({
       archive: result.archive,

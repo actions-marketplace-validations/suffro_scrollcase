@@ -28200,6 +28200,7 @@ function actionSummary(result) {
 async function main() {
   try {
     const options2 = readActionOptions(getInput);
+    setOutput("target", options2.target);
     const result = await executeAction(options2, { log: info });
     for (const [name, value] of Object.entries({
       archive: result.archive,

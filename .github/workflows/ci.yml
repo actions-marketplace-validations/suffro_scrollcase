@@ -53,9 +53,17 @@ jobs:
           scroll: action-smoke-missing
           target: ${{ matrix.target }}
       - name: Require the expected validation failure
-        if: steps.missing-box.outcome != 'failure'
+        if: always()
         shell: bash
-        run: exit 1
+        run: |
+          if [ "${{ steps.missing-box.outputs.target }}" != "${{ matrix.target }}" ]; then
+            echo "The Action manifest or bundle did not load far enough to validate its input" >&2
+            exit 1
+          fi
+          if [ "${{ steps.missing-box.outcome }}" != "failure" ]; then
+            echo "The deliberately missing scroll did not fail" >&2
+            exit 1
+          fi
 
   package:
     name: package surface

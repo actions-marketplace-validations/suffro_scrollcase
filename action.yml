@@ -24,7 +24,7 @@ inputs:
     required: false
     default: 'true'
   channel:
-    description: Channel document to build: nightly, beta or stable.
+    description: 'Channel document to build: nightly, beta or stable.'
     required: false
     default: beta
   namespace:
@@ -61,7 +61,7 @@ outputs:
   box-version:
     description: Box version read from the validated scroll.
   runtime:
-    description: Runtime id read from the validated scroll: python, node or native.
+    description: 'Runtime id read from the validated scroll: python, node or native.'
   target:
     description: Canonical target id read from the validated scroll.
 runs:
