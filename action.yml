@@ -2,8 +2,8 @@ name: Scrollcase Build
 author: Lorenzo S.
 description: Build and verify one signed Scrollcase box on the matching GitHub Actions runner.
 branding:
-  icon: package
-  color: blue
+  icon: box
+  color: yellow
 inputs:
   scroll:
     description: Box id under the project's configured scrolls directory.

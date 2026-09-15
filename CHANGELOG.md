@@ -18,6 +18,12 @@ All notable changes to Scrollcase are documented here. The format follows
   be pinned in committed `scrollcase.config.json`. The committed Node 24 bundle includes its
   dependencies and schemas; `action:check` rejects generated drift.
 
+### Changed
+
+- **The GitHub Marketplace badge now uses the yellow box branding.** GitHub Actions accepts a
+  supported Feather icon and palette colour rather than a custom image, so this is the closest
+  Marketplace representation of Scrollcase's box and brand yellow.
+
 ## [1.2.0] — 2026-09-12
 
 ### Added
