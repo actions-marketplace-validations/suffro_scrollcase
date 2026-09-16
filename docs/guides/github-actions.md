@@ -4,6 +4,12 @@ The official Action builds and verifies **one target on the current runner**. A 
 runner; Scrollcase checks that it matches the target before installing a toolchain or building.
 The scroll itself declares whether the box runtime is `python`, `node` or `native`.
 
+<Button href="https://github.com/marketplace/actions/scrollcase-build" external>
+
+View on GitHub Marketplace
+
+</Button>
+
 ```yaml
 name: box
 
