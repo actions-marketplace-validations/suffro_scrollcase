@@ -8,6 +8,11 @@ All notable changes to Scrollcase are documented here. The format follows
 
 ### Added
 
+- **A new Updating Boxes guide separates rebuilds from downloads and lifecycle changes.** It covers
+  code, configuration, dependency and asset updates for `python`, `node` and `native` runtimes;
+  explains embedded, deferred and application-managed files; and shows how cached assets,
+  side-by-side installation, channel promotion and rollback fit together without weakening
+  verification.
 - **An official GitHub Action builds and verifies one box target.** It reads the runtime from the
   scroll, supports `python`, `node` and `native`, validates its complete input surface before work,
   refuses a runner that does not match the target, and returns the archive, release, channel and

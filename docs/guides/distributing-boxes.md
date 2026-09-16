@@ -10,6 +10,9 @@ channel, revoking a release — all of that belongs to whoever consumes Scrollca
 explains what the build hands you, why it is shaped that way, and how to build distribution on
 top of it without fighting the format.
 
+For the lifecycle built on top of these files — code updates, reusable deferred assets,
+side-by-side installation and rollback — see [Updating Boxes](/guides/updating-boxes).
+
 ::: info Why the boundary
 A packaging tool that also serves a registry has to keep proving both sets of guarantees; one
 that stops at a file on disk composes with any distribution mechanism you already have. Every one

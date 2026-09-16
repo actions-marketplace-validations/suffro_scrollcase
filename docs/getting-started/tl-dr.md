@@ -69,6 +69,10 @@ flowchart TB
 2. re-run `scrollcase lock <boxId>/<targetId>` only when required
 3. run `scrollcase build <boxId>/<targetId>`
 
+Large files do not have to travel again with every release. [Updating
+Boxes](/guides/updating-boxes) explains embedded and deferred assets, independently managed inputs,
+promotion and rollback for Python, Node and native boxes.
+
 ## Responsibility split
 
 <Tabs :titles="['The Developer', 'Scrollcase', 'The Consuming Application', 'The End User']">

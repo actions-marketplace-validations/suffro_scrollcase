@@ -195,7 +195,9 @@ you verified is what you install.
 
 Defer the entries that would make the archive unreasonable to move around, that are shared by
 several boxes, or that your asset host is already the thing your users download from. Then read
-[Offline / Air-Gapped Installs](/guides/offline-airgap) to understand what you gave up.
+[Offline / Air-Gapped Installs](/guides/offline-airgap) to understand what you gave up, and
+[Updating Boxes](/guides/updating-boxes#choose-where-large-or-frequently-changing-files-belong) to
+see when an unchanged asset can be reused across releases.
 
 ## Files that have to run
 
